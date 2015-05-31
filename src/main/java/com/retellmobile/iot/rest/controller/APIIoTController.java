@@ -114,10 +114,25 @@ public class APIIoTController {
 
     }
 
+    @RequestMapping(value = "/users/{token}/devices/{device_id}/actions", method = RequestMethod.GET)
+    public @ResponseBody ModelAndView getActionsAvailableForDevice(
+	    @PathVariable("device_id") int deviceId,
+	    @PathVariable("token") String token,
+	    HttpServletResponse httpResponse_p, WebRequest request_p) {
+	return getAvailableActionsForUserDevice(deviceId, token);
+
+    }
+
     @RequestMapping(value = "/devices/{device_id}/actions", method = RequestMethod.GET)
     public @ResponseBody ModelAndView getActionsAvailableForDevice(
 	    @PathVariable("device_id") int deviceId,
 	    HttpServletResponse httpResponse_p, WebRequest request_p) {
+	return getAvailableActionsForUserDevice(deviceId, null);
+
+    }
+
+    private ModelAndView getAvailableActionsForUserDevice(int deviceId,
+	    String token) {
 	boolean status = false;
 	String msg = null;
 	List<Action> actions = new ArrayList<Action>();
@@ -134,7 +149,6 @@ public class APIIoTController {
 	mav.addObject(STATUS_FIELD, status);
 	mav.addObject(MSG_FIELD, msg);
 	return mav;
-
     }
 
     // TODO execute the request based on the body.

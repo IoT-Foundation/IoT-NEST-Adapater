@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:oxm="http://www.springframework.org/schema/oxm"
+		xmlns:util="http://www.springframework.org/schema/util"
+		xmlns:mvc="http://www.springframework.org/schema/mvc"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xmlns:aop="http://www.springframework.org/schema/aop"
+    	xmlns:jee="http://www.springframework.org/schema/jee"
+    	xmlns:lang="http://www.springframework.org/schema/lang"
+    	xmlns:p="http://www.springframework.org/schema/p"
+    	xmlns:tx="http://www.springframework.org/schema/tx"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans 
+							http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+							http://www.springframework.org/schema/mvc 
+							http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+							http://www.springframework.org/schema/context 
+							http://www.springframework.org/schema/context/spring-context-3.0.xsd
+							http://www.springframework.org/schema/oxm
+							http://www.springframework.org/schema/oxm/spring-oxm-3.0.xsd
+							http://www.springframework.org/schema/util
+  							http://www.springframework.org/schema/util/spring-util-3.0.xsd
+  							http://www.springframework.org/schema/aop 
+  							http://www.springframework.org/schema/aop/spring-aop.xsd
+        					http://www.springframework.org/schema/jee 
+        					http://www.springframework.org/schema/jee/spring-jee.xsd
+        					http://www.springframework.org/schema/lang 
+        					http://www.springframework.org/schema/lang/spring-lang.xsd
+        					http://www.springframework.org/schema/tx 
+        					http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+
+	<!--
+		 Enables automatic mapping of fund objects to and from JSON
+	-->
+
+	<context:annotation-config />
+	<!--
+		 Setup spring to pull in @Controller, @RequestMapping, etc Configuration scans specified packages
+		 for classes configured as Spring managed beans and automatically sets up objects annotated with
+		 @Controller, @Service etc.
+	-->
+	<context:component-scan base-package="com.retellmobile.iot." />
+	
+	<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
+
+	<!--
+		 Configures view for returning JSON to the client
+	-->
+	<bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView">
+		<property name="contentType" value="application/json"/>
+	</bean>
+
+	<!--
+		 TODO
+	-->
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="messageConverters">
+			<util:list id="beanList">
+				<ref bean="jsonMessageConverter"/>
+			</util:list>
+		</property>
+	</bean>
+
+	<!--
+		 Converts JSON to POJO and vice versa
+	-->
+	<bean id="jsonMessageConverter" class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter"/>
+
+	<bean id="propertyConfigurer"
+        class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+        p:location="/WEB-INF/database.properties" />
+ 
+    <bean id="dataSource"
+        class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"
+        p:driverClassName="${jdbc.driverClassName}"
+        p:url="${jdbc.url}" 
+        p:username="${jdbc.username}"
+        p:password="${jdbc.password}"
+        p:validationQuery="Select 1"
+        p:timeBetweenEvictionRunsMillis="3600"
+        p:testWhileIdle="true"
+        p:minEvictableIdleTimeMillis="3600"/>
+
+    <bean id="sessionFactory" 
+        class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+  		<property name="dataSource" ref="dataSource" />
+  		<property name="configLocation">
+    		<value>classpath:hibernate.cfg.xml</value>
+  		</property>
+		<property name="configurationClass">
+  			<value>org.hibernate.cfg.AnnotationConfiguration</value>
+		</property>
+  		<property name="hibernateProperties">
+    		<props>
+      			<prop key="hibernate.dialect">${jdbc.dialect}</prop>
+      			<prop key="hibernate.show_sql">true</prop>
+    		</props>
+  		</property>
+	</bean> 
+	
+	<mvc:annotation-driven/>
+	<tx:annotation-driven />
+		
+	<bean id="transactionManager"
+        class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+    
+    <bean id="httpClient" class="org.apache.http.impl.client.DefaultHttpClient">
+        <constructor-arg>
+            <bean class="org.apache.http.impl.conn.PoolingClientConnectionManager"/>
+        </constructor-arg>
+    </bean>
+    
+    <bean id="restTemplate" 
+        class="org.springframework.web.client.RestTemplate">
+        <property name="messageConverters">
+            <list>
+            <!-- <ref bean="marshallingConverter" />
+            <ref bean="atomConverter"  />-->
+            <ref bean="jsonConverter" />
+            </list>
+        </property>
+        <constructor-arg>
+            <bean class="org.springframework.http.client.HttpComponentsClientHttpRequestFactory">
+                <constructor-arg ref="httpClient"/>
+            </bean>
+        </constructor-arg>
+    </bean>
+    
+    <bean id="jsonConverter" class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+        <property name="supportedMediaTypes" value="application/json" />
+    </bean>
+    
+        <bean class="com.retellmobile.iot.filter.ApiSecurityFilterChain" 
+        id="apiSecurityFilterChain" />
+
+    <bean
+        class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix">
+            <value>/WEB-INF/pages/</value>
+        </property>
+        <property name="suffix">
+            <value>.jsp</value>
+        </property>
+    </bean>
+</beans>

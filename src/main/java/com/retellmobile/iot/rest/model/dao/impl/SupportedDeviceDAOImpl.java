@@ -30,7 +30,7 @@ public class SupportedDeviceDAOImpl implements SupportedDeviceDAO {
     @Override
     public List<SupportedDevice> getSupportedDevices() {
 	return sessionFactory.getCurrentSession()
-		.createQuery("from SupportedDevices").list();
+		.createQuery("from SupportedDevice").list();
     }
 
 }

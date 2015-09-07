@@ -4,6 +4,8 @@ import java.text.MessageFormat;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -27,8 +29,11 @@ import org.springframework.web.servlet.view.json.MappingJacksonJsonView;
 import com.retellmobile.iot.rest.model.SessionTokenMapper;
 import com.retellmobile.iot.rest.model.TokenMapper;
 import com.retellmobile.iot.rest.model.User;
+import com.retellmobile.iot.rest.services.DeviceService;
 import com.retellmobile.iot.rest.services.EndpointInfoService;
 import com.retellmobile.iot.rest.services.UserService;
+import com.retellmobile.iot.rest.util.NestClient;
+import com.retellmobile.iot.rest.util.NestClient.UrlType;
 
 @Controller
 public class WebIoTController {
@@ -39,6 +44,8 @@ public class WebIoTController {
     protected EndpointInfoService endpointSrv;
     @Autowired
     protected UserService userSrv;
+    @Autowired
+    protected DeviceService deviceSrv;
     @Autowired
     private RestTemplate restTemplate;
 
@@ -61,6 +68,7 @@ public class WebIoTController {
 
     }
 
+    // Incoming call from the IoT fabric
     @RequestMapping(value = "/{name}/login", method = RequestMethod.GET)
     public String welcomeName(
 	    @PathVariable String name,
@@ -72,20 +80,27 @@ public class WebIoTController {
 	if ("NEST".equalsIgnoreCase(name.trim())) {
 	    // TODO validate the caller
 	    // save info from caller
-	    SessionTokenMapper stm = new SessionTokenMapper();
-	    stm.setClientId(clientId);
-	    stm.setReturnURL(returnURL);
-	    stm.setState(state);
-	    this.userSrv.upsertSessionData(stm);
-	    model.addAttribute("name", name);
-	    model.addAttribute("OAuthURL", AUTH_URL + clientId);
-	    model.addAttribute("message", name + " Login");
+	    try {
+		SessionTokenMapper stm = new SessionTokenMapper();
+		stm.setClientId(clientId);
+		stm.setReturnURL(returnURL);
+		stm.setState(state);
+		this.userSrv.upsertSessionData(stm);
+		model.addAttribute("name", name);
+		model.addAttribute("OAuthURL", AUTH_URL + clientId);
+		model.addAttribute("message", name + " Login");
+	    } catch (Exception ex) {
+		if (ex instanceof com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException) {
+		    return "Session has already been used.";
+		}
+	    }
 	}
 	logger.debug("[/name] for : {}", name);
 	return loginPage;
 
     }
 
+    // callback from NEST.
     @RequestMapping(value = "/callback/{name}", method = RequestMethod.GET)
     public String callbackName(@PathVariable String name, ModelMap model,
 	    @RequestParam(value = "state", required = false) String clientId,
@@ -115,11 +130,17 @@ public class WebIoTController {
 		tm.setToken(token);
 		this.userSrv.addTokenMapper(tm);
 
+		// set user's devices
+		ExecutorService eSrv = Executors.newFixedThreadPool(10);
+		eSrv.submit(new NestClient(UrlType.ALL_DEVICES, accessToken,
+			token, this.deviceSrv));
+
 		// redirect the caller
 		StringBuffer sb = new StringBuffer(initiatorInfo.getReturnURL());
 		sb.append("?state=" + initiatorInfo.getState());
 		sb.append("&client_id=" + initiatorInfo.getSessionId());
 		sb.append("&code=" + tempToken);
+
 		return "redirect:" + sb.toString();
 	    }
 	} catch (Exception e) {
@@ -132,16 +153,13 @@ public class WebIoTController {
     }
 
     protected String getAuthToken(String code) throws Exception {
-	if (true) {
-	    return "12345";
-	}
 	String authToken = null;
 	HttpHeaders headers = new HttpHeaders();
 	headers.setContentType(MediaType.APPLICATION_JSON);
 	HttpEntity<String> entity = new HttpEntity<String>(headers);
 	String url = MessageFormat.format(ACCESS_TOKEN_URL, code);
-	ResponseEntity<?> response = restTemplate.exchange(url, HttpMethod.GET,
-		entity, Object.class);
+	ResponseEntity<?> response = restTemplate.exchange(url,
+		HttpMethod.POST, entity, Object.class);
 	if (response != null && response.getBody() != null) {
 	    @SuppressWarnings("unchecked")
 	    LinkedHashMap<String, ?> data = (LinkedHashMap<String, ?>) response

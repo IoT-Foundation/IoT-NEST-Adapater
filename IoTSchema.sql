@@ -30,7 +30,7 @@ CREATE TABLE `actions` (
   `description` varchar(512) DEFAULT NULL,
   `valueName` varchar(256) NOT NULL,
   `valueType` varchar(45) NOT NULL DEFAULT 'String',
-  `deviceId` mediumint(9) NOT NULL DEFAULT '0',
+  `deviceId` mediumint(9) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`)
@@ -43,7 +43,7 @@ CREATE TABLE `actions` (
 
 LOCK TABLES `actions` WRITE;
 /*!40000 ALTER TABLE `actions` DISABLE KEYS */;
-INSERT INTO `actions` VALUES (1,'Set Away','Sets the Nest thermostat to Away setting.','123-123','String',2),(2,'Set Temprature','Sets the temprature of the thermostat.','target_temprature_f','Float',2),(3,'Set ETA','Sets the Estimated time of Arival.  Time in milliseconds after January 1, 1970, 0:00:00 GMT.','estimated_arrival_window_end','Float',2),(4,'Get Temprature','Gets the current temprature of the thermostat','123-123','String',2);
+INSERT INTO `actions` VALUES (1,'Set Away','Sets the Nest thermostat to Away setting.','123-123','String',0),(2,'Set Temprature','Sets the temprature of the thermostat.','target_temprature_f','Float',0),(3,'Set ETA','Sets the Estimated time of Arival.  Time in milliseconds after January 1, 1970, 0:00:00 GMT.','estimated_arrival_window_end','Float',0),(4,'Get Temprature','Gets the current temprature of the thermostat','123-123','String',0);
 /*!40000 ALTER TABLE `actions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -84,9 +84,9 @@ DROP TABLE IF EXISTS `devices`;
 CREATE TABLE `devices` (
   `deviceType` varchar(128) NOT NULL,
   `misc` varchar(256) DEFAULT NULL,
-  `id` mediumint(9) unsigned NOT NULL AUTO_INCREMENT,
+  `id` mediumint(9) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -95,7 +95,7 @@ CREATE TABLE `devices` (
 
 LOCK TABLES `devices` WRITE;
 /*!40000 ALTER TABLE `devices` DISABLE KEYS */;
-INSERT INTO `devices` VALUES ('smoke_co_alarms',NULL,1),('thermostats',NULL,2);
+INSERT INTO `devices` VALUES ('thermostats',NULL,0),('smoke_co_alarms',NULL,1);
 /*!40000 ALTER TABLE `devices` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -141,7 +141,7 @@ CREATE TABLE `sessionTokenMapper` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   UNIQUE KEY `sessionId_UNIQUE` (`sessionId`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=47 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -150,7 +150,7 @@ CREATE TABLE `sessionTokenMapper` (
 
 LOCK TABLES `sessionTokenMapper` WRITE;
 /*!40000 ALTER TABLE `sessionTokenMapper` DISABLE KEYS */;
-INSERT INTO `sessionTokenMapper` VALUES ('123',3,'http://www.google.com','234');
+INSERT INTO `sessionTokenMapper` VALUES ('Starbucks123',46,'https://www.starbucks.com','ON');
 /*!40000 ALTER TABLE `sessionTokenMapper` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -174,7 +174,7 @@ CREATE TABLE `tokenMapper` (
 
 LOCK TABLES `tokenMapper` WRITE;
 /*!40000 ALTER TABLE `tokenMapper` DISABLE KEYS */;
-INSERT INTO `tokenMapper` VALUES ('e33631d8-dc34-44ce-be66-03ae6d6354f5','d7a218fd-e1b6-49fc-93ed-2aec9ddefb35');
+INSERT INTO `tokenMapper` VALUES ('932dcecd-fed8-45b8-9070-cba296afd48f','ac964718-1fca-4398-8805-a797ca9ea2c4');
 /*!40000 ALTER TABLE `tokenMapper` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -187,16 +187,19 @@ DROP TABLE IF EXISTS `userDevices`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `userDevices` (
   `id` mediumint(9) NOT NULL AUTO_INCREMENT,
-  `deviceId` mediumint(9) NOT NULL,
+  `deviceId` varchar(128) NOT NULL,
   `userDeviceId` varchar(128) NOT NULL,
   `deviceName` varchar(256) DEFAULT NULL,
   `structureId` varchar(256) DEFAULT NULL,
   `deviceLongName` varchar(256) DEFAULT NULL,
   `token` varchar(128) NOT NULL,
+  `structureName` varchar(256) DEFAULT NULL,
+  `postalCode` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `structureIdAndDeviceIdMapping` (`deviceId`,`structureId`),
   KEY `userToDeviceMapping_idx` (`token`),
   CONSTRAINT `userToDeviceMapping` FOREIGN KEY (`token`) REFERENCES `users` (`token`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -205,7 +208,7 @@ CREATE TABLE `userDevices` (
 
 LOCK TABLES `userDevices` WRITE;
 /*!40000 ALTER TABLE `userDevices` DISABLE KEYS */;
-INSERT INTO `userDevices` VALUES (2,2,'12348765','MyAC','#2132A','My First Floor AC','123-123');
+INSERT INTO `userDevices` VALUES (2,'asbecdiefag','1','MyAC','#2132A','My First Floor AC','123-123','Home','78703'),(10,'cAJvZQ5lhBxrPsSGdaYhEl2jVGzz3wgS','1','Office','wD2JoyPtoodpRKt5kZ_i08294COoewkQ02LxcCiQhJeZLn-1rtWcFQ','Office Nest Protect','ac964718-1fca-4398-8805-a797ca9ea2c4','Home','78727'),(11,'_fEhAd9g8CaC0BtoVa-kWV2jVGzz3wgS','0','Kitchen','wD2JoyPtoodpRKt5kZ_i08294COoewkQ02LxcCiQhJeZLn-1rtWcFQ','Kitchen Thermostat','ac964718-1fca-4398-8805-a797ca9ea2c4','Home','78727');
 /*!40000 ALTER TABLE `userDevices` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -217,8 +220,8 @@ DROP TABLE IF EXISTS `users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `users` (
-  `token` varchar(128) NOT NULL,
-  `oauthToken` varchar(128) NOT NULL,
+  `token` varchar(256) NOT NULL,
+  `oauthToken` varchar(256) NOT NULL,
   `insertedTimestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedTimestamp` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`token`),
@@ -232,7 +235,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES ('123-123','Sean B','2015-03-04 19:41:32','2015-03-04 19:41:32'),('321-321','Fred M','2015-03-04 19:41:32','2015-03-04 19:41:32'),('d7a218fd-e1b6-49fc-93ed-2aec9ddefb35','12345','2015-04-05 20:24:30','2015-04-05 20:24:29');
+INSERT INTO `users` VALUES ('123-123','Sean_B','2015-03-04 19:41:32','2015-03-04 19:41:32'),('321-321','Fred_M','2015-03-04 19:41:32','2015-03-04 19:41:32'),('ac964718-1fca-4398-8805-a797ca9ea2c4','c.PJdbzIaxq1wj83IclRHxEsT3MmR2Rsmyhdya3xYeCDHZIEtFzYExMiK5mWC5clWmHOApDmKAVnk1pch9SRiRyRXiMo7cES772QTDhGjy7ek3d0kMto3BVJkLozadSTnLLk2PXLKiB3KYenVa','2015-09-07 17:36:15','2015-09-07 17:36:15');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -245,4 +248,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-05-31 13:41:28
+-- Dump completed on 2015-09-07 13:00:39

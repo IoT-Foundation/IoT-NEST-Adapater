@@ -27,6 +27,7 @@ public class ApiSecurityFilterChain implements Filter {
 
     }
 
+    // filter validates token from adapterConfig table
     @Override
     public void doFilter(ServletRequest request, ServletResponse response,
 	    FilterChain chain) throws IOException, ServletException {

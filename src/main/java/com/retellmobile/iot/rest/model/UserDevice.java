@@ -2,6 +2,8 @@ package com.retellmobile.iot.rest.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -9,14 +11,19 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "userDevices")
 public class UserDevice {
+
+    public enum DeviceType {
+	thermostats, smoke_co_alarms
+    }
+
     @Id
     @GeneratedValue
     @Column(name = "id")
     private Integer dbId;
     @Column(name = "deviceId")
-    private Integer deviceId;
+    private String deviceId;
     @Column(name = "userDeviceId")
-    private String userDeviceIdentifier;
+    private DeviceType deviceType;
     @Column(name = "deviceName")
     private String deviceShortName;
     @Column(name = "structureId")
@@ -25,21 +32,27 @@ public class UserDevice {
     private String deviceLongName;
     @Column(name = "token")
     private String token;
+    @Column(name = "structureName")
+    private String structName;
+    @Column(name = "postalCode")
+    private String zipCode;
 
-    public Integer getDeviceId() {
+    public String getDeviceId() {
 	return deviceId;
     }
 
-    public void setDeviceId(Integer deviceId) {
+    public void setDeviceId(String deviceId) {
 	this.deviceId = deviceId;
     }
 
-    public String getUserDeviceIdentifier() {
-	return userDeviceIdentifier;
+    @Enumerated(EnumType.ORDINAL)
+    public DeviceType getUserDeviceType() {
+	return deviceType;
     }
 
-    public void setUserDeviceIdentifier(String userDeviceIdentifier) {
-	this.userDeviceIdentifier = userDeviceIdentifier;
+    @Enumerated(EnumType.ORDINAL)
+    public void setUserDeviceType(DeviceType deviceType) {
+	this.deviceType = deviceType;
     }
 
     public String getDeviceShortName() {
@@ -76,5 +89,21 @@ public class UserDevice {
 
     public Integer getDbId() {
 	return dbId;
+    }
+
+    public String getStructName() {
+	return structName;
+    }
+
+    public void setStructName(String structName) {
+	this.structName = structName;
+    }
+
+    public String getZipCode() {
+	return zipCode;
+    }
+
+    public void setZipCode(String zipCode) {
+	this.zipCode = zipCode;
     }
 }

@@ -74,30 +74,6 @@ public class APIIoTController {
 
     }
 
-    // Authorizes the code sent during OAuth, and returns the user token
-    @RequestMapping(value = "/authorize/{code}", method = RequestMethod.GET)
-    public @ResponseBody ModelAndView getUserInformation(
-	    @PathVariable("code") String code,
-	    HttpServletResponse httpResponse_p, WebRequest request_p) {
-	boolean status = false;
-	String msg = null;
-	TokenMapper tm = null;
-	try {
-	    tm = this.userSrv.getTokenMapperByTempToken(code);
-	    status = true;
-	} catch (Exception ex) {
-	    msg = ex.getLocalizedMessage();
-	}
-
-	ModelAndView mav = new ModelAndView();
-	mav.setView(jsonView);
-	mav.addObject(RESULT_FIELD, tm);
-	mav.addObject(STATUS_FIELD, status);
-	mav.addObject(MSG_FIELD, msg);
-	return mav;
-
-    }
-
     // Get list of supported devices by this adapter
     @RequestMapping(value = "/devices", method = RequestMethod.GET)
     public @ResponseBody ModelAndView getSupportedDevices(
@@ -127,6 +103,30 @@ public class APIIoTController {
 	    @PathVariable("device_id") int deviceId,
 	    HttpServletResponse httpResponse_p, WebRequest request_p) {
 	return getAvailableActionsForUserDevice(deviceId, null);
+
+    }
+
+    // Authorizes the code sent during OAuth, and returns the user token
+    @RequestMapping(value = "/authorize/{code}", method = RequestMethod.GET)
+    public @ResponseBody ModelAndView authorizeTempCode(
+	    @PathVariable("code") String code,
+	    HttpServletResponse httpResponse_p, WebRequest request_p) {
+	boolean status = false;
+	String msg = null;
+	TokenMapper tm = null;
+	try {
+	    tm = this.userSrv.getTokenMapperByTempToken(code);
+	    status = true;
+	} catch (Exception ex) {
+	    msg = ex.getLocalizedMessage();
+	}
+
+	ModelAndView mav = new ModelAndView();
+	mav.setView(jsonView);
+	mav.addObject(RESULT_FIELD, tm);
+	mav.addObject(STATUS_FIELD, status);
+	mav.addObject(MSG_FIELD, msg);
+	return mav;
 
     }
 

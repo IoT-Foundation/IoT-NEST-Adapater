@@ -49,6 +49,8 @@ public class WebIoTController {
     @Autowired
     private RestTemplate restTemplate;
 
+    ExecutorService eSrv = Executors.newFixedThreadPool(10);
+
     private static final String VIEW_INDEX = "index";
     private final static org.slf4j.Logger logger = LoggerFactory
 	    .getLogger(WebIoTController.class);
@@ -131,7 +133,6 @@ public class WebIoTController {
 		this.userSrv.addTokenMapper(tm);
 
 		// set user's devices
-		ExecutorService eSrv = Executors.newFixedThreadPool(10);
 		eSrv.submit(new NestClient(UrlType.ALL_DEVICES, accessToken,
 			token, this.deviceSrv));
 
@@ -163,7 +164,7 @@ public class WebIoTController {
 	if (response != null && response.getBody() != null) {
 	    @SuppressWarnings("unchecked")
 	    LinkedHashMap<String, ?> data = (LinkedHashMap<String, ?>) response
-		    .getBody();
+	    .getBody();
 	    authToken = String.valueOf(data.get("access_token"));
 	    String expiresIn = String.valueOf(data.get("expires_in"));
 	    System.out.println("Expires in:  " + expiresIn);

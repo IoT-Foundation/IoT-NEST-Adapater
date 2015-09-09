@@ -12,8 +12,12 @@ import javax.persistence.Table;
 @Table(name = "userDevices")
 public class UserDevice {
 
-    public enum DeviceType {
-	thermostats, smoke_co_alarms
+    public static enum DeviceType {
+	THERMOSTATS, SMOKE_CO_ALRAMS;
+
+	public static DeviceType get(int i) {
+	    return values()[i];
+	}
     }
 
     @Id
@@ -22,8 +26,11 @@ public class UserDevice {
     private Integer dbId;
     @Column(name = "deviceId")
     private String deviceId;
+
     @Column(name = "userDeviceId")
+    @Enumerated(EnumType.ORDINAL)
     private DeviceType deviceType;
+
     @Column(name = "deviceName")
     private String deviceShortName;
     @Column(name = "structureId")
@@ -45,12 +52,10 @@ public class UserDevice {
 	this.deviceId = deviceId;
     }
 
-    @Enumerated(EnumType.ORDINAL)
     public DeviceType getUserDeviceType() {
 	return deviceType;
     }
 
-    @Enumerated(EnumType.ORDINAL)
     public void setUserDeviceType(DeviceType deviceType) {
 	this.deviceType = deviceType;
     }

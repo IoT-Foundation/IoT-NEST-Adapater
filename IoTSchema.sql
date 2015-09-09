@@ -188,7 +188,7 @@ DROP TABLE IF EXISTS `userDevices`;
 CREATE TABLE `userDevices` (
   `id` mediumint(9) NOT NULL AUTO_INCREMENT,
   `deviceId` varchar(128) NOT NULL,
-  `userDeviceId` varchar(128) NOT NULL,
+  `userDeviceId` mediumint(9) NOT NULL,
   `deviceName` varchar(256) DEFAULT NULL,
   `structureId` varchar(256) DEFAULT NULL,
   `deviceLongName` varchar(256) DEFAULT NULL,
@@ -208,7 +208,7 @@ CREATE TABLE `userDevices` (
 
 LOCK TABLES `userDevices` WRITE;
 /*!40000 ALTER TABLE `userDevices` DISABLE KEYS */;
-INSERT INTO `userDevices` VALUES (2,'asbecdiefag','1','MyAC','#2132A','My First Floor AC','123-123','Home','78703'),(10,'cAJvZQ5lhBxrPsSGdaYhEl2jVGzz3wgS','1','Office','wD2JoyPtoodpRKt5kZ_i08294COoewkQ02LxcCiQhJeZLn-1rtWcFQ','Office Nest Protect','ac964718-1fca-4398-8805-a797ca9ea2c4','Home','78727'),(11,'_fEhAd9g8CaC0BtoVa-kWV2jVGzz3wgS','0','Kitchen','wD2JoyPtoodpRKt5kZ_i08294COoewkQ02LxcCiQhJeZLn-1rtWcFQ','Kitchen Thermostat','ac964718-1fca-4398-8805-a797ca9ea2c4','Home','78727');
+INSERT INTO `userDevices` VALUES (2,'asbecdiefag',1,'MyAC','#2132A','My First Floor AC','123-123','Home','78703'),(10,'cAJvZQ5lhBxrPsSGdaYhEl2jVGzz3wgS',1,'Office','wD2JoyPtoodpRKt5kZ_i08294COoewkQ02LxcCiQhJeZLn-1rtWcFQ','Office Nest Protect','ac964718-1fca-4398-8805-a797ca9ea2c4','Home','78727'),(11,'_fEhAd9g8CaC0BtoVa-kWV2jVGzz3wgS',0,'Kitchen','wD2JoyPtoodpRKt5kZ_i08294COoewkQ02LxcCiQhJeZLn-1rtWcFQ','Kitchen Thermostat','ac964718-1fca-4398-8805-a797ca9ea2c4','Home','78727');
 /*!40000 ALTER TABLE `userDevices` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -248,4 +248,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-09-07 13:00:39
+-- Dump completed on 2015-09-08 23:35:20

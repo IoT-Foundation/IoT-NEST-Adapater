@@ -9,7 +9,7 @@ public interface UserDeviceDAO {
 
     List<UserDevice> getDevicesForUser(String token);
 
-    UserDevice getDeviceByUserDeviceIdentifier(String userDId);
+    UserDevice getDeviceByUserDeviceIdentifier(String deviceId);
 
     int deleteDeviceById(int dbId);
 

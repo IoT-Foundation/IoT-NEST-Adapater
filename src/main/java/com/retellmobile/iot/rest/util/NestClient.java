@@ -78,14 +78,14 @@ public class NestClient implements Callable<String> {
 	if (smokeAlarms != null) {
 	    for (int i = 0; i < smokeAlarms.length(); ++i) {
 		String deviceId = smokeAlarms.getString(i);
-		storeDeviceInfo(deviceId, DeviceType.smoke_co_alarms,
+		storeDeviceInfo(deviceId, DeviceType.SMOKE_CO_ALRAMS,
 			structInfo, data);
 	    }
 	}
 	if (thermostats != null) {
 	    for (int i = 0; i < thermostats.length(); ++i) {
 		String deviceId = thermostats.getString(i);
-		storeDeviceInfo(deviceId, DeviceType.thermostats, structInfo,
+		storeDeviceInfo(deviceId, DeviceType.THERMOSTATS, structInfo,
 			data);
 	    }
 	}

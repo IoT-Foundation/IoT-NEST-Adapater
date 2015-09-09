@@ -1,10 +1,8 @@
 package com.retellmobile.iot.rest.controller;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,7 +25,6 @@ import com.retellmobile.iot.rest.model.Action;
 import com.retellmobile.iot.rest.model.SupportedDevice;
 import com.retellmobile.iot.rest.model.TokenMapper;
 import com.retellmobile.iot.rest.model.UserDevice;
-import com.retellmobile.iot.rest.model.UserDevice.DeviceType;
 import com.retellmobile.iot.rest.services.DeviceService;
 import com.retellmobile.iot.rest.services.EndpointInfoService;
 import com.retellmobile.iot.rest.services.UserService;
@@ -99,7 +96,7 @@ public class APIIoTController {
 
     // Get list of supported actions on the device
     @RequestMapping(value = "/devices/{device_id}/actions", method = RequestMethod.GET)
-    public @ResponseBody ModelAndView getActionsAvailableForDevice(
+    public @ResponseBody ModelAndView getAvailableActionsForDevice(
 	    @PathVariable("device_id") int deviceId,
 	    HttpServletResponse httpResponse_p, WebRequest request_p) {
 	return getAvailableActionsForUserDevice(deviceId, null);
@@ -144,6 +141,7 @@ public class APIIoTController {
 	    devices = this.deviceSrv.getUserDevices(token);
 	    status = true;
 	} catch (Exception ex) {
+	    ex.printStackTrace();
 	    msg = ex.getLocalizedMessage();
 	}
 
@@ -158,24 +156,18 @@ public class APIIoTController {
     // get list of all actions for user device
     @RequestMapping(value = "/users/{token}/devices/{device_id}/actions", method = RequestMethod.GET)
     public @ResponseBody ModelAndView getActionsAvailableForDevice(
-	    @PathVariable("device_id") int deviceId,
+	    @PathVariable("device_id") String userDeviceId,
 	    @PathVariable("token") String token,
 	    HttpServletResponse httpResponse_p, WebRequest request_p) {
 	boolean status = false;
 	String msg = "";
 	List<Action> actions = new ArrayList<Action>();
-	List<UserDevice> devices = this.deviceSrv.getUserDevices(token);
-	Set<DeviceType> dTypes = new HashSet<DeviceType>();
+	UserDevice device = this.deviceSrv
+		.getUserDeviceByUserDeviceId(userDeviceId);
 	try {
-	    for (UserDevice device : devices) {
-		dTypes.add(device.getUserDeviceType());
-	    }
-
-	    for (DeviceType dt : dTypes) {
-		actions.addAll(this.deviceSrv.getActionsForDevice(dt.ordinal()));
-		status = true;
-	    }
-
+	    actions.addAll(this.deviceSrv.getActionsForDevice(device
+		    .getUserDeviceType().ordinal()));
+	    status = true;
 	} catch (Exception ex) {
 	    msg = ex.getLocalizedMessage();
 	}

@@ -28,13 +28,13 @@ public class UserDeviceDAOImpl implements UserDeviceDAO {
     }
 
     @Override
-    public UserDevice getDeviceByUserDeviceIdentifier(String userDId) {
+    public UserDevice getDeviceByUserDeviceIdentifier(String deviceId) {
 	@SuppressWarnings("unchecked")
 	List<UserDevice> device = sessionFactory
 	.getCurrentSession()
 	.createQuery(
-		"from UserDevice where userDeviceIdentifier ='"
-				+ userDId + "'").list();
+		"from UserDevice where deviceId ='" + deviceId + "'")
+		.list();
 	if (device != null && device.size() > 0) {
 	    return device.get(0);
 	} else {

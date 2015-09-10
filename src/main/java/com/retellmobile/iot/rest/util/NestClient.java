@@ -15,7 +15,7 @@ import com.retellmobile.iot.rest.services.DeviceService;
 public class NestClient implements Callable<String> {
 
     public enum UrlType {
-	ALL_DEVICES
+	ALL_DEVICES, MY_DEVICE
     }
 
     private final String NEST_BASE_URL = "https://developer-api.nest.com";
@@ -23,15 +23,17 @@ public class NestClient implements Callable<String> {
     private String token;
     private DeviceService deviceSrv;
     private UrlType urlType;
+    private String appendURL;
 
     // Use this to create a JavaMailClient (or essentially one email). Not
     // memory efficient though...
     public NestClient(UrlType urlType, String accessToken, String token,
-	    DeviceService deviceSrv) {
+	    String appendURL, DeviceService deviceSrv) {
 	this.deviceSrv = deviceSrv;
 	this.accessToken = accessToken;
 	this.token = token;
 	this.urlType = urlType;
+	this.appendURL = appendURL;
     }
 
     @Override
@@ -41,7 +43,7 @@ public class NestClient implements Callable<String> {
 	    String nResp = restTemplate.getForObject(this.getURLForCall(),
 		    String.class);
 	    processReturnObj(new JSONObject(nResp));
-	    return nResp.toString();
+	    return nResp;
 	} catch (Exception ex) {
 	    ex.printStackTrace();
 	}
@@ -52,6 +54,9 @@ public class NestClient implements Callable<String> {
 	switch (this.urlType) {
 	case ALL_DEVICES:
 	    storeDevices(nResp);
+	    break;
+	case MY_DEVICE:
+	    // Do nothing for now
 	    break;
 	default:
 	    break;
@@ -78,14 +83,14 @@ public class NestClient implements Callable<String> {
 	if (smokeAlarms != null) {
 	    for (int i = 0; i < smokeAlarms.length(); ++i) {
 		String deviceId = smokeAlarms.getString(i);
-		storeDeviceInfo(deviceId, DeviceType.smoke_co_alarms,
+		storeDeviceInfo(deviceId, DeviceType.SMOKE_CO_ALRAMS,
 			structInfo, data);
 	    }
 	}
 	if (thermostats != null) {
 	    for (int i = 0; i < thermostats.length(); ++i) {
 		String deviceId = thermostats.getString(i);
-		storeDeviceInfo(deviceId, DeviceType.thermostats, structInfo,
+		storeDeviceInfo(deviceId, DeviceType.THERMOSTATS, structInfo,
 			data);
 	    }
 	}
@@ -114,6 +119,9 @@ public class NestClient implements Callable<String> {
 	switch (this.urlType) {
 	case ALL_DEVICES:
 	    url = NEST_BASE_URL + "?auth=" + this.accessToken;
+	    break;
+	case MY_DEVICE:
+	    url = NEST_BASE_URL + this.appendURL + "?auth=" + this.accessToken;
 	    break;
 	default:
 	    break;

@@ -1,10 +1,11 @@
 package com.retellmobile.iot.rest.controller;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,11 +27,13 @@ import org.springframework.web.servlet.view.json.MappingJacksonJsonView;
 import com.retellmobile.iot.rest.model.Action;
 import com.retellmobile.iot.rest.model.SupportedDevice;
 import com.retellmobile.iot.rest.model.TokenMapper;
+import com.retellmobile.iot.rest.model.User;
 import com.retellmobile.iot.rest.model.UserDevice;
-import com.retellmobile.iot.rest.model.UserDevice.DeviceType;
 import com.retellmobile.iot.rest.services.DeviceService;
 import com.retellmobile.iot.rest.services.EndpointInfoService;
 import com.retellmobile.iot.rest.services.UserService;
+import com.retellmobile.iot.rest.util.NestClient;
+import com.retellmobile.iot.rest.util.NestClient.UrlType;
 
 @Controller
 public class APIIoTController {
@@ -43,6 +46,8 @@ public class APIIoTController {
     protected UserService userSrv;
     @Autowired
     protected DeviceService deviceSrv;
+
+    ExecutorService eSrv = Executors.newFixedThreadPool(10);
 
     private static final String VIEW_INDEX = "index";
     private final static org.slf4j.Logger logger = LoggerFactory
@@ -74,30 +79,6 @@ public class APIIoTController {
 
     }
 
-    // Authorizes the code sent during OAuth, and returns the user token
-    @RequestMapping(value = "/authorize/{code}", method = RequestMethod.GET)
-    public @ResponseBody ModelAndView getUserInformation(
-	    @PathVariable("code") String code,
-	    HttpServletResponse httpResponse_p, WebRequest request_p) {
-	boolean status = false;
-	String msg = null;
-	TokenMapper tm = null;
-	try {
-	    tm = this.userSrv.getTokenMapperByTempToken(code);
-	    status = true;
-	} catch (Exception ex) {
-	    msg = ex.getLocalizedMessage();
-	}
-
-	ModelAndView mav = new ModelAndView();
-	mav.setView(jsonView);
-	mav.addObject(RESULT_FIELD, tm);
-	mav.addObject(STATUS_FIELD, status);
-	mav.addObject(MSG_FIELD, msg);
-	return mav;
-
-    }
-
     // Get list of supported devices by this adapter
     @RequestMapping(value = "/devices", method = RequestMethod.GET)
     public @ResponseBody ModelAndView getSupportedDevices(
@@ -123,10 +104,34 @@ public class APIIoTController {
 
     // Get list of supported actions on the device
     @RequestMapping(value = "/devices/{device_id}/actions", method = RequestMethod.GET)
-    public @ResponseBody ModelAndView getActionsAvailableForDevice(
+    public @ResponseBody ModelAndView getAvailableActionsForDevice(
 	    @PathVariable("device_id") int deviceId,
 	    HttpServletResponse httpResponse_p, WebRequest request_p) {
 	return getAvailableActionsForUserDevice(deviceId, null);
+
+    }
+
+    // Authorizes the code sent during OAuth, and returns the user token
+    @RequestMapping(value = "/authorize/{code}", method = RequestMethod.GET)
+    public @ResponseBody ModelAndView authorizeTempCode(
+	    @PathVariable("code") String code,
+	    HttpServletResponse httpResponse_p, WebRequest request_p) {
+	boolean status = false;
+	String msg = null;
+	TokenMapper tm = null;
+	try {
+	    tm = this.userSrv.getTokenMapperByTempToken(code);
+	    status = true;
+	} catch (Exception ex) {
+	    msg = ex.getLocalizedMessage();
+	}
+
+	ModelAndView mav = new ModelAndView();
+	mav.setView(jsonView);
+	mav.addObject(RESULT_FIELD, tm);
+	mav.addObject(STATUS_FIELD, status);
+	mav.addObject(MSG_FIELD, msg);
+	return mav;
 
     }
 
@@ -144,6 +149,7 @@ public class APIIoTController {
 	    devices = this.deviceSrv.getUserDevices(token);
 	    status = true;
 	} catch (Exception ex) {
+	    ex.printStackTrace();
 	    msg = ex.getLocalizedMessage();
 	}
 
@@ -155,27 +161,55 @@ public class APIIoTController {
 	return mav;
     }
 
+    // get info regarding specific device.
+    // this call needs to be streamed or staggered as it might kill the server.
+    @RequestMapping(value = "/users/{token}/devices/{device_id}", method = RequestMethod.GET)
+    public @ResponseBody ModelAndView getInfoAboutDevice(
+	    @PathVariable("device_id") String userDeviceId,
+	    @PathVariable("token") String token,
+	    HttpServletResponse httpResponse_p, WebRequest request_p) {
+	boolean status = false;
+	String msg = "";
+	JSONObject data = null;
+	UserDevice device = this.deviceSrv
+		.getUserDeviceByUserDeviceId(userDeviceId);
+	User user = this.userSrv.getUserFromToken(token);
+	String partialURL = "/devices/"
+		+ device.getUserDeviceType().name().toLowerCase() + "/"
+		+ device.getDeviceId();
+	try {
+	    Future<String> result = eSrv.submit(new NestClient(
+		    UrlType.MY_DEVICE, user.getNestAuthToken(), token,
+		    partialURL, this.deviceSrv));
+	    data = new JSONObject(result.get());
+	    status = true;
+	} catch (Exception ex) {
+	    msg = ex.getLocalizedMessage();
+	}
+
+	ModelAndView mav = new ModelAndView();
+	mav.setView(jsonView);
+	mav.addObject(RESULT_FIELD, data.toString());
+	mav.addObject(STATUS_FIELD, status);
+	mav.addObject(MSG_FIELD, msg);
+	return mav;
+    }
+
     // get list of all actions for user device
     @RequestMapping(value = "/users/{token}/devices/{device_id}/actions", method = RequestMethod.GET)
     public @ResponseBody ModelAndView getActionsAvailableForDevice(
-	    @PathVariable("device_id") int deviceId,
+	    @PathVariable("device_id") String userDeviceId,
 	    @PathVariable("token") String token,
 	    HttpServletResponse httpResponse_p, WebRequest request_p) {
 	boolean status = false;
 	String msg = "";
 	List<Action> actions = new ArrayList<Action>();
-	List<UserDevice> devices = this.deviceSrv.getUserDevices(token);
-	Set<DeviceType> dTypes = new HashSet<DeviceType>();
+	UserDevice device = this.deviceSrv
+		.getUserDeviceByUserDeviceId(userDeviceId);
 	try {
-	    for (UserDevice device : devices) {
-		dTypes.add(device.getUserDeviceType());
-	    }
-
-	    for (DeviceType dt : dTypes) {
-		actions.addAll(this.deviceSrv.getActionsForDevice(dt.ordinal()));
-		status = true;
-	    }
-
+	    actions.addAll(this.deviceSrv.getActionsForDevice(device
+		    .getUserDeviceType().ordinal()));
+	    status = true;
 	} catch (Exception ex) {
 	    msg = ex.getLocalizedMessage();
 	}

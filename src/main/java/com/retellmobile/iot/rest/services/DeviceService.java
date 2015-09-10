@@ -74,4 +74,9 @@ public class DeviceService {
     public int addAction(Action action) {
 	return this.actionDAO.addAction(action);
     }
+
+    public UserDevice getUserDevicesByDeviceId(String token, int deviceId) {
+	// TODO Auto-generated method stub
+	return null;
+    }
 }

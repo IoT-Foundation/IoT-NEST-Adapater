@@ -12,10 +12,10 @@ import com.retellmobile.iot.rest.model.UserDevice;
 import com.retellmobile.iot.rest.model.UserDevice.DeviceType;
 import com.retellmobile.iot.rest.services.DeviceService;
 
-public class NestClient implements Callable<String> {
+public class NestClient implements Callable<JSONObject> {
 
     public enum UrlType {
-	ALL_DEVICES, MY_DEVICE
+	ALL_DEVICES, MY_DEVICE, SET_TEMPERATURE
     }
 
     private final String NEST_BASE_URL = "https://developer-api.nest.com";
@@ -37,13 +37,17 @@ public class NestClient implements Callable<String> {
     }
 
     @Override
-    public String call() throws Exception {
+    public JSONObject call() throws Exception {
 	try {
+	    JSONObject result = new JSONObject();
 	    RestTemplate restTemplate = new RestTemplate();
 	    String nResp = restTemplate.getForObject(this.getURLForCall(),
 		    String.class);
 	    processReturnObj(new JSONObject(nResp));
-	    return nResp;
+	    if (nResp != null) {
+		result = new JSONObject(nResp);
+	    }
+	    return result;
 	} catch (Exception ex) {
 	    ex.printStackTrace();
 	}
@@ -57,6 +61,8 @@ public class NestClient implements Callable<String> {
 	    break;
 	case MY_DEVICE:
 	    // Do nothing for now
+	    break;
+	case SET_TEMPERATURE:
 	    break;
 	default:
 	    break;
@@ -83,7 +89,7 @@ public class NestClient implements Callable<String> {
 	if (smokeAlarms != null) {
 	    for (int i = 0; i < smokeAlarms.length(); ++i) {
 		String deviceId = smokeAlarms.getString(i);
-		storeDeviceInfo(deviceId, DeviceType.SMOKE_CO_ALRAMS,
+		storeDeviceInfo(deviceId, DeviceType.SMOKE_CO_ALARMS,
 			structInfo, data);
 	    }
 	}
@@ -122,6 +128,10 @@ public class NestClient implements Callable<String> {
 	    break;
 	case MY_DEVICE:
 	    url = NEST_BASE_URL + this.appendURL + "?auth=" + this.accessToken;
+	    break;
+	case SET_TEMPERATURE:
+	    url = NEST_BASE_URL + this.appendURL + "?auth=" + this.accessToken;
+	    ;
 	    break;
 	default:
 	    break;

@@ -13,7 +13,7 @@ import javax.persistence.Table;
 public class UserDevice {
 
     public static enum DeviceType {
-	THERMOSTATS, SMOKE_CO_ALRAMS;
+	THERMOSTATS, SMOKE_CO_ALARMS;
 
 	public static DeviceType get(int i) {
 	    return values()[i];

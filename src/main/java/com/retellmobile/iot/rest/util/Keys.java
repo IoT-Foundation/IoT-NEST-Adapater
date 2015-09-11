@@ -11,7 +11,7 @@ package com.retellmobile.iot.rest.util;
  * governing permissions and limitations under the License.
  */
 
-class Keys {
+public interface Keys {
     static final String METADATA = "metadata";
     static final String DEVICES = "devices";
     static final String THERMOSTATS = "thermostats";
@@ -36,7 +36,7 @@ class Keys {
 	static final String CLIENT_VERSION = "client_version";
     }
 
-    static class THERMOSTAT {
+    public interface THERMOSTAT {
 	static final String CAN_COOL = "can_cool";
 	static final String CAN_HEAT = "can_heat";
 	static final String IS_USING_EMERGENCY_HEAT = "is_using_emergency_heat";
@@ -58,9 +58,10 @@ class Keys {
 	static final String HVAC_MODE = "hvac_mode";
 	static final String AMBIENT_TEMP_F = "ambient_temperature_f";
 	static final String AMBIENT_TEMP_C = "ambient_temperature_c";
+	static final String HVAC_STATE = "hvac_state";
     }
 
-    static class SMOKE_CO_ALARM {
+    public static interface SMOKE_CO_ALARM {
 	static final String BATTERY_HEALTH = "battery_health";
 	static final String CO_ALARM_STATE = "co_alarm_state";
 	static final String SMOKE_ALARM_STATE = "smoke_alarm_state";

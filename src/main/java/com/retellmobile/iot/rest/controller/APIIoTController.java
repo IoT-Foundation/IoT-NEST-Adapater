@@ -29,6 +29,9 @@ import com.retellmobile.iot.rest.model.SupportedDevice;
 import com.retellmobile.iot.rest.model.TokenMapper;
 import com.retellmobile.iot.rest.model.User;
 import com.retellmobile.iot.rest.model.UserDevice;
+import com.retellmobile.iot.rest.model.UserDevice.DeviceType;
+import com.retellmobile.iot.rest.resp.model.SmokeAlarmData;
+import com.retellmobile.iot.rest.resp.model.ThermostatsData;
 import com.retellmobile.iot.rest.services.DeviceService;
 import com.retellmobile.iot.rest.services.EndpointInfoService;
 import com.retellmobile.iot.rest.services.UserService;
@@ -169,8 +172,11 @@ public class APIIoTController {
 	    @PathVariable("token") String token,
 	    HttpServletResponse httpResponse_p, WebRequest request_p) {
 	boolean status = false;
+	ModelAndView mav = new ModelAndView();
+	mav.setView(jsonView);
+	mav.addObject(RESULT_FIELD, null);
 	String msg = "";
-	JSONObject data = null;
+
 	UserDevice device = this.deviceSrv
 		.getUserDeviceByUserDeviceId(userDeviceId);
 	User user = this.userSrv.getUserFromToken(token);
@@ -178,18 +184,20 @@ public class APIIoTController {
 		+ device.getUserDeviceType().name().toLowerCase() + "/"
 		+ device.getDeviceId();
 	try {
-	    Future<String> result = eSrv.submit(new NestClient(
+	    Future<JSONObject> result = eSrv.submit(new NestClient(
 		    UrlType.MY_DEVICE, user.getNestAuthToken(), token,
 		    partialURL, this.deviceSrv));
-	    data = new JSONObject(result.get());
+	    JSONObject value = result.get();
+	    if (device.getUserDeviceType().equals(DeviceType.THERMOSTATS)) {
+		mav.addObject(RESULT_FIELD, new ThermostatsData(value));
+	    } else {
+		mav.addObject(RESULT_FIELD, new SmokeAlarmData(value));
+	    }
 	    status = true;
 	} catch (Exception ex) {
 	    msg = ex.getLocalizedMessage();
 	}
 
-	ModelAndView mav = new ModelAndView();
-	mav.setView(jsonView);
-	mav.addObject(RESULT_FIELD, data.toString());
 	mav.addObject(STATUS_FIELD, status);
 	mav.addObject(MSG_FIELD, msg);
 	return mav;

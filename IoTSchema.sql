@@ -29,7 +29,7 @@ CREATE TABLE `actions` (
   `name` varchar(254) NOT NULL,
   `description` varchar(512) DEFAULT NULL,
   `valueName` varchar(256) NOT NULL,
-  `valueType` varchar(45) NOT NULL DEFAULT 'String',
+  `valueType` varchar(256) NOT NULL DEFAULT 'String',
   `deviceId` mediumint(9) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
@@ -43,7 +43,7 @@ CREATE TABLE `actions` (
 
 LOCK TABLES `actions` WRITE;
 /*!40000 ALTER TABLE `actions` DISABLE KEYS */;
-INSERT INTO `actions` VALUES (1,'Set Away','Sets the Nest thermostat to Away setting.','123-123','String',0),(2,'Set Temprature','Sets the temprature of the thermostat.','target_temprature_f','Float',0),(3,'Set ETA','Sets the Estimated time of Arival.  Time in milliseconds after January 1, 1970, 0:00:00 GMT.','estimated_arrival_window_end','Float',0),(4,'Get Temprature','Gets the current temprature of the thermostat','123-123','String',0);
+INSERT INTO `actions` VALUES (1,'Set Away','Sets the Nest thermostat to Away setting.','away','String (home, away, auto-away, unknown)',0),(2,'Set Temprature','Sets the temprature of the thermostat.','target_temprature_f, hvac_mode','String (63-88), String (heat, cool, heat-cool, off)',0),(3,'Set ETA','Sets the Estimated time of Arival.  Time in milliseconds after January 1, 1970, 0:00:00 GMT.','estimated_arrival_window_end','Float',0);
 /*!40000 ALTER TABLE `actions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -248,4 +248,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-09-08 23:35:20
+-- Dump completed on 2015-09-11 22:49:47

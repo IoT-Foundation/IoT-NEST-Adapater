@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.NotSupportedException;
 
+import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -293,21 +294,52 @@ public class APIIoTController {
     @RequestMapping(value = "/users/{token}/devices/{device_id}/actions/{action_id}", method = RequestMethod.PUT)
     public @ResponseBody ModelAndView executeActions(
 	    @PathVariable("token") String token,
-	    @PathVariable("device_id") int deviceId,
+	    @PathVariable("device_id") String deviceToken,
 	    @PathVariable("action_id") int actionId,
-	    /* @RequestBody JSONObject requestBody, */HttpServletRequest request,
-	    HttpServletResponse httpResponse_p, WebRequest request_p) {
+	    // @RequestBody JSONObject body,
+	    HttpServletResponse httpResponse_p, WebRequest request_p,
+	    HttpServletRequest request) {
 	boolean status = false;
 	String msg = null;
-	this.userSrv.getUserFromToken(token);
-	this.deviceSrv.getActionById(actionId);
-	try {
-	    // TODO call validate, and then execute the request
-	    // Is this call async?
-	    System.out.println("DONE NOW!");
-	    status = true;
-	} catch (Exception ex) {
-	    msg = ex.getLocalizedMessage();
+	User user = this.userSrv.getUserFromToken(token);
+	if (user != null) {
+	    UserDevice device = this.deviceSrv
+		    .getUserDeviceByUserDeviceId(deviceToken);
+	    if (device != null) {
+		List<Action> actions = this.deviceSrv
+			.getActionsForDevice(device.getUserDeviceType()
+				.ordinal());
+		boolean hasAction = false;
+		Action myAction = null;
+		for (Action action : actions) {
+		    if (action.getDbId() == actionId) {
+			myAction = action;
+			hasAction = true;
+			break;
+		    }
+		}
+		if (hasAction) {
+		    try {
+			// TODO call validate, and then execute the request
+			// Is this call async?
+			String data = IOUtils
+				.toString(request.getInputStream());
+			JSONObject jObj = new JSONObject(data);
+
+			System.out.println("DONE NOW!" + jObj
+				+ myAction.toString());
+			status = true;
+		    } catch (Exception ex) {
+			msg = ex.getLocalizedMessage();
+		    }
+		} else {
+		    msg = "Action not associated with device.";
+		}
+	    } else {
+		msg = "Invalid device association with provided device token.";
+	    }
+	} else {
+	    msg = "Invalid user association with provided token.";
 	}
 
 	ModelAndView mav = new ModelAndView();

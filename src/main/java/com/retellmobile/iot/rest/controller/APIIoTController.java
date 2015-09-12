@@ -1,5 +1,6 @@
 package com.retellmobile.iot.rest.controller;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -105,10 +106,41 @@ public class APIIoTController {
 
     }
 
+    // Get list of supported devices by this adapter
+    @RequestMapping(value = "/devices/{device_type_id}", method = RequestMethod.GET)
+    public @ResponseBody ModelAndView getDeviceMetadata(
+	    @PathVariable("device_type_id") int deviceTypeId,
+	    HttpServletResponse httpResponse_p, WebRequest request_p) {
+	boolean status = false;
+	String msg = null;
+	Field[] fields = null;
+	try {
+	    DeviceType dt = DeviceType.get(deviceTypeId);
+	    if (dt.equals(DeviceType.THERMOSTATS)) {
+		// thermostat
+		fields = ThermostatsData.class.getFields();
+	    } else {
+		// Smoke detector
+		fields = SmokeAlarmData.class.getFields();
+	    }
+	    status = true;
+	} catch (Exception ex) {
+	    msg = ex.getLocalizedMessage();
+	}
+
+	ModelAndView mav = new ModelAndView();
+	mav.setView(jsonView);
+	mav.addObject(RESULT_FIELD, fields);
+	mav.addObject(STATUS_FIELD, status);
+	mav.addObject(MSG_FIELD, msg);
+	return mav;
+
+    }
+
     // Get list of supported actions on the device
-    @RequestMapping(value = "/devices/{device_id}/actions", method = RequestMethod.GET)
+    @RequestMapping(value = "/devices/{device_type_id}/actions", method = RequestMethod.GET)
     public @ResponseBody ModelAndView getAvailableActionsForDevice(
-	    @PathVariable("device_id") int deviceId,
+	    @PathVariable("device_type_id") int deviceId,
 	    HttpServletResponse httpResponse_p, WebRequest request_p) {
 	return getAvailableActionsForUserDevice(deviceId, null);
 
@@ -231,8 +263,9 @@ public class APIIoTController {
     }
 
     // TODO validation of request based on the body.
-    @RequestMapping(value = "/devices/{device_id}/actions/{action_id}/validate", method = RequestMethod.PUT)
+    @RequestMapping(value = "/users/{token}/devices/{device_id}/actions/{action_id}/validate", method = RequestMethod.PUT)
     public @ResponseBody ModelAndView validateActions(
+	    @PathVariable("token") String token,
 	    @PathVariable("device_id") int deviceId,
 	    @PathVariable("action_id") int actionId,
 	    @RequestBody JSONObject requestBody, HttpServletRequest request,
@@ -257,18 +290,21 @@ public class APIIoTController {
     // TODO execute the request based on the body. Do we need this call to be
     // async? We can have a call back url or rest method
     // @return returns instance information
-    @RequestMapping(value = "/devices/{device_id}/actions/{action_id}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/users/{token}/devices/{device_id}/actions/{action_id}", method = RequestMethod.PUT)
     public @ResponseBody ModelAndView executeActions(
+	    @PathVariable("token") String token,
 	    @PathVariable("device_id") int deviceId,
 	    @PathVariable("action_id") int actionId,
-	    @RequestBody JSONObject requestBody, HttpServletRequest request,
+	    /* @RequestBody JSONObject requestBody, */HttpServletRequest request,
 	    HttpServletResponse httpResponse_p, WebRequest request_p) {
 	boolean status = false;
 	String msg = null;
-	List<Action> actions = new ArrayList<Action>();
+	this.userSrv.getUserFromToken(token);
+	this.deviceSrv.getActionById(actionId);
 	try {
 	    // TODO call validate, and then execute the request
 	    // Is this call async?
+	    System.out.println("DONE NOW!");
 	    status = true;
 	} catch (Exception ex) {
 	    msg = ex.getLocalizedMessage();
@@ -276,7 +312,7 @@ public class APIIoTController {
 
 	ModelAndView mav = new ModelAndView();
 	mav.setView(jsonView);
-	mav.addObject(RESULT_FIELD, actions);
+	mav.addObject(RESULT_FIELD, null);
 	mav.addObject(STATUS_FIELD, status);
 	mav.addObject(MSG_FIELD, msg);
 	return mav;

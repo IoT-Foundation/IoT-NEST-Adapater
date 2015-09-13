@@ -324,10 +324,26 @@ public class APIIoTController {
 			// Is this call async?
 			String data = IOUtils
 				.toString(request.getInputStream());
-			JSONObject jObj = new JSONObject(data);
+			JSONObject reqData = new JSONObject(data);
 
-			System.out.println("DONE NOW!" + jObj
-				+ myAction.toString());
+			String valueNames = myAction.getValueName();
+			String valueTypes = myAction.getValueType();
+
+			String[] valueKeys = valueNames.split(";");
+			String[] types = valueTypes.split(";");
+
+			if (valueKeys.length == reqData.length()) {
+			    if (valueKeys.length == types.length) {
+				// do a put on NEST
+			    } else {
+				msg = "Inconsistent data/values on server";
+			    }
+			} else {
+			    msg = "Invalid count of values for the requested action.";
+			}
+
+			System.out.println("DONE NOW!" + valueKeys.toString()
+				+ types.toString());
 			status = true;
 		    } catch (Exception ex) {
 			msg = ex.getLocalizedMessage();

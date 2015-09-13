@@ -15,7 +15,11 @@ import com.retellmobile.iot.rest.services.DeviceService;
 public class NestClient implements Callable<JSONObject> {
 
     public enum UrlType {
-	ALL_DEVICES, MY_DEVICE, SET_TEMPERATURE
+	ALL_DEVICES, MY_DEVICE, SET_TEMPERATURE;
+    }
+
+    public enum requestType {
+	GET, PUT;
     }
 
     private final String NEST_BASE_URL = "https://developer-api.nest.com";
@@ -138,4 +142,5 @@ public class NestClient implements Callable<JSONObject> {
 	}
 	return url;
     }
+
 }

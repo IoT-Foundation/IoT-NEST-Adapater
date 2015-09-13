@@ -18,7 +18,7 @@ public class NestClient implements Callable<JSONObject> {
 	ALL_DEVICES, MY_DEVICE, SET_TEMPERATURE;
     }
 
-    public enum requestType {
+    public enum RequestType {
 	GET, PUT;
     }
 
@@ -27,6 +27,7 @@ public class NestClient implements Callable<JSONObject> {
     private String token;
     private DeviceService deviceSrv;
     private UrlType urlType;
+    private RequestType reqType;
     private String appendURL;
 
     // Use this to create a JavaMailClient (or essentially one email). Not
@@ -129,13 +130,15 @@ public class NestClient implements Callable<JSONObject> {
 	switch (this.urlType) {
 	case ALL_DEVICES:
 	    url = NEST_BASE_URL + "?auth=" + this.accessToken;
+	    reqType = RequestType.GET;
 	    break;
 	case MY_DEVICE:
 	    url = NEST_BASE_URL + this.appendURL + "?auth=" + this.accessToken;
+	    reqType = RequestType.GET;
 	    break;
 	case SET_TEMPERATURE:
 	    url = NEST_BASE_URL + this.appendURL + "?auth=" + this.accessToken;
-	    ;
+	    reqType = RequestType.PUT;
 	    break;
 	default:
 	    break;

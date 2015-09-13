@@ -14,6 +14,7 @@ public class DeviceData {
     public String name_long;
     public String last_connection;
     public boolean is_online;
+    public int device_type;
 
     public DeviceData(JSONObject jObj) {
 	try {
@@ -94,6 +95,14 @@ public class DeviceData {
 
     public void setIs_online(boolean is_online) {
 	this.is_online = is_online;
+    }
+
+    public int getDevice_type() {
+	return device_type;
+    }
+
+    public void setDevice_type(int deviceType) {
+	this.device_type = deviceType;
     }
 
 }

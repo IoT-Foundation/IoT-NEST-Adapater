@@ -222,8 +222,12 @@ public class APIIoTController {
 		    partialURL, this.deviceSrv));
 	    JSONObject value = result.get();
 	    if (device.getUserDeviceType().equals(DeviceType.THERMOSTATS)) {
+		ThermostatsData td = new ThermostatsData(value);
+		td.setDevice_type(DeviceType.THERMOSTATS.ordinal());
 		mav.addObject(RESULT_FIELD, new ThermostatsData(value));
 	    } else {
+		SmokeAlarmData sad = new SmokeAlarmData(value);
+		sad.setDevice_type(DeviceType.SMOKE_CO_ALARMS.ordinal());
 		mav.addObject(RESULT_FIELD, new SmokeAlarmData(value));
 	    }
 	    status = true;
@@ -335,6 +339,12 @@ public class APIIoTController {
 			if (valueKeys.length == reqData.length()) {
 			    if (valueKeys.length == types.length) {
 				// do a put on NEST
+				// Future<JSONObject> result = eSrv.submit(new
+				// NestClient(
+				// UrlType.SET_TEMPERATURE,
+				// user.getNestAuthToken(), token,
+				// partialURL, this.deviceSrv));
+				// JSONObject value = result.get();
 			    } else {
 				msg = "Inconsistent data/values on server";
 			    }

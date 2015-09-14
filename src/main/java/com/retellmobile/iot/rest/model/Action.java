@@ -23,6 +23,7 @@ public class Action {
     private String valueType;
     @Column(name = "deviceId")
     private Integer deviceId;
+    private String partialURL;
 
     public String getName() {
 	return name;
@@ -66,6 +67,14 @@ public class Action {
 
     public void setDeviceId(Integer deviceId) {
 	this.deviceId = deviceId;
+    }
+
+    public String getPartialURL() {
+	return partialURL;
+    }
+
+    public void setPartialURL(String partialURL) {
+	this.partialURL = partialURL;
     }
 
 }

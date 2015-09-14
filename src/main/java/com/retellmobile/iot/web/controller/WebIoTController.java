@@ -134,7 +134,7 @@ public class WebIoTController {
 
 		// set user's devices
 		eSrv.submit(new NestClient(UrlType.ALL_DEVICES, accessToken,
-			token, null, this.deviceSrv));
+			token, null, this.deviceSrv, null));
 
 		// redirect the caller
 		StringBuffer sb = new StringBuffer(initiatorInfo.getReturnURL());
@@ -164,7 +164,7 @@ public class WebIoTController {
 	if (response != null && response.getBody() != null) {
 	    @SuppressWarnings("unchecked")
 	    LinkedHashMap<String, ?> data = (LinkedHashMap<String, ?>) response
-		    .getBody();
+	    .getBody();
 	    authToken = String.valueOf(data.get("access_token"));
 	    String expiresIn = String.valueOf(data.get("expires_in"));
 	    System.out.println("Expires in:  " + expiresIn);

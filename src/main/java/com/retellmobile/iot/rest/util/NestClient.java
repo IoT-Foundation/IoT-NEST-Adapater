@@ -1,11 +1,16 @@
 package com.retellmobile.iot.rest.util;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.concurrent.Callable;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 
 import com.retellmobile.iot.rest.model.UserDevice;
@@ -29,16 +34,18 @@ public class NestClient implements Callable<JSONObject> {
     private UrlType urlType;
     private RequestType reqType;
     private String appendURL;
+    private JSONObject body;
 
     // Use this to create a JavaMailClient (or essentially one email). Not
     // memory efficient though...
     public NestClient(UrlType urlType, String accessToken, String token,
-	    String appendURL, DeviceService deviceSrv) {
+	    String appendURL, DeviceService deviceSrv, JSONObject body) {
 	this.deviceSrv = deviceSrv;
 	this.accessToken = accessToken;
 	this.token = token;
 	this.urlType = urlType;
 	this.appendURL = appendURL;
+	this.body = body;
     }
 
     @Override
@@ -46,11 +53,29 @@ public class NestClient implements Callable<JSONObject> {
 	try {
 	    JSONObject result = new JSONObject();
 	    RestTemplate restTemplate = new RestTemplate();
-	    String nResp = restTemplate.getForObject(this.getURLForCall(),
-		    String.class);
-	    processReturnObj(new JSONObject(nResp));
-	    if (nResp != null) {
-		result = new JSONObject(nResp);
+	    String nResp;
+	    // dummy call to get request type
+	    this.getURLForCall();
+	    if (this.reqType.equals(RequestType.GET)) {
+		nResp = restTemplate.getForObject(this.getURLForCall(),
+			String.class);
+		processReturnObj(new JSONObject(nResp));
+		if (nResp != null) {
+		    result = new JSONObject(nResp);
+		}
+	    } else {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+
+		HttpEntity<String> entity = new HttpEntity<String>(
+			this.body.toString(), headers);
+
+		restTemplate.exchange(this.getURLForCall(), HttpMethod.PUT,
+			entity, String.class);
+		result = new JSONObject(
+			"{\"message\":\"successfully updated the temperature.\"}");
+		// restTemplate.put(this.getURLForCall(), this.body);
+		// nResp = "";
 	    }
 	    return result;
 	} catch (Exception ex) {

@@ -1,6 +1,7 @@
 package com.retellmobile.iot.rest.controller;
 
 import java.lang.reflect.Field;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -219,7 +220,7 @@ public class APIIoTController {
 	try {
 	    Future<JSONObject> result = eSrv.submit(new NestClient(
 		    UrlType.MY_DEVICE, user.getNestAuthToken(), token,
-		    partialURL, this.deviceSrv));
+		    partialURL, this.deviceSrv, null));
 	    JSONObject value = result.get();
 	    if (device.getUserDeviceType().equals(DeviceType.THERMOSTATS)) {
 		ThermostatsData td = new ThermostatsData(value);
@@ -304,6 +305,7 @@ public class APIIoTController {
 	    HttpServletResponse httpResponse_p, WebRequest request_p,
 	    HttpServletRequest request) {
 	boolean status = false;
+	JSONObject value = null;
 	String msg = null;
 	User user = this.userSrv.getUserFromToken(token);
 	if (user != null) {
@@ -339,21 +341,28 @@ public class APIIoTController {
 			if (valueKeys.length == reqData.length()) {
 			    if (valueKeys.length == types.length) {
 				// do a put on NEST
-				// Future<JSONObject> result = eSrv.submit(new
-				// NestClient(
-				// UrlType.SET_TEMPERATURE,
-				// user.getNestAuthToken(), token,
-				// partialURL, this.deviceSrv));
-				// JSONObject value = result.get();
+				String partialURL = myAction.getPartialURL();
+				if (partialURL.startsWith("/structures")) {
+				    partialURL = MessageFormat
+					    .format(partialURL,
+						    device.getStructureId());
+				} else {
+				    partialURL = MessageFormat.format(
+					    partialURL, device.getDeviceId());
+				}
+				Future<JSONObject> result = eSrv
+					.submit(new NestClient(
+						UrlType.SET_TEMPERATURE, user
+							.getNestAuthToken(),
+						token, partialURL,
+						this.deviceSrv, reqData));
+				value = result.get();
 			    } else {
 				msg = "Inconsistent data/values on server";
 			    }
 			} else {
 			    msg = "Invalid count of values for the requested action.";
 			}
-
-			System.out.println("DONE NOW!" + valueKeys.toString()
-				+ types.toString());
 			status = true;
 		    } catch (Exception ex) {
 			msg = ex.getLocalizedMessage();
@@ -370,7 +379,7 @@ public class APIIoTController {
 
 	ModelAndView mav = new ModelAndView();
 	mav.setView(jsonView);
-	mav.addObject(RESULT_FIELD, null);
+	mav.addObject(RESULT_FIELD, value);
 	mav.addObject(STATUS_FIELD, status);
 	mav.addObject(MSG_FIELD, msg);
 	return mav;

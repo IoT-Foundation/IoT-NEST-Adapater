@@ -1,3 +1,5 @@
+CREATE DATABASE  IF NOT EXISTS `iot` /*!40100 DEFAULT CHARACTER SET latin1 */;
+USE `iot`;
 -- MySQL dump 10.13  Distrib 5.6.19, for osx10.7 (i386)
 --
 -- Host: localhost    Database: iot
@@ -136,7 +138,7 @@ CREATE TABLE `sessionTokenMapper` (
   `sessionId` varchar(254) NOT NULL,
   `id` mediumint(9) NOT NULL AUTO_INCREMENT,
   `returnURL` varchar(512) NOT NULL,
-  `state` varchar(254) NOT NULL,
+  `state` varchar(512) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   UNIQUE KEY `sessionId_UNIQUE` (`sessionId`)
@@ -247,4 +249,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-09-13 13:37:59
+-- Dump completed on 2015-10-18 14:20:45

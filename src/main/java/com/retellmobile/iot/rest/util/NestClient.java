@@ -11,6 +11,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import com.retellmobile.iot.rest.model.UserDevice;
@@ -70,8 +71,10 @@ public class NestClient implements Callable<JSONObject> {
 		HttpEntity<String> entity = new HttpEntity<String>(
 			this.body.toString(), headers);
 
-		restTemplate.exchange(this.getURLForCall(), HttpMethod.PUT,
-			entity, String.class);
+		ResponseEntity<String> data = restTemplate.exchange(
+			this.getURLForCall(), HttpMethod.PUT, entity,
+			String.class);
+		System.out.println("Response: " + data);
 		result = new JSONObject(
 			"{\"message\":\"successfully updated the temperature.\"}");
 		// restTemplate.put(this.getURLForCall(), this.body);

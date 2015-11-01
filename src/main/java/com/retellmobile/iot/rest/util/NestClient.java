@@ -99,9 +99,10 @@ public class NestClient implements Callable<JSONObject> {
 		}
 
 		result = new JSONObject(
-			"{\"message\":\"successfully updated the temperature.\"}");
-		// restTemplate.put(this.getURLForCall(), this.body);
-		// nResp = "";
+			"{\"message\":\"successfully updated the endpoint.\"}");
+		JSONArray rData = new JSONArray();
+		rData.put(data.getBody());
+		result.put("result", rData);
 	    }
 	    return result;
 	} catch (Exception ex) {

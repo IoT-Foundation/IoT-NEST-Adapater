@@ -44,7 +44,7 @@ CREATE TABLE `actions` (
 
 LOCK TABLES `actions` WRITE;
 /*!40000 ALTER TABLE `actions` DISABLE KEYS */;
-INSERT INTO `actions` VALUES (1,'Set Away','Sets the Nest thermostat to Away setting.','away','String (home, away, auto-away, unknown)',0,'/structures/{0}/away'),(2,'Set Temprature','Sets the temprature of the thermostat.','target_temprature_f; hvac_mode','String (63-88); String (heat, cool, heat-cool, off)',0,'/devices/{0}'),(3,'Set ETA','Sets the Estimated time of Arival.  Time in milliseconds after January 1, 1970, 0:00:00 GMT.','estimated_arrival_window_begin, estimated_arrival_window_end','String (YYYY-MM-DDTHh:Mm:Ss.mmmZ), String (YYYY-MM-DDTHh:Mm:Ss.mmmZ)',0,'/structures/{0}/eta');
+INSERT INTO `actions` VALUES (1,'Set Away','Sets the Nest thermostat to Away setting.','away','String (home, away, auto-away, unknown)',0,'/structures/{0}'),(2,'Set Temprature','Sets the temprature of the thermostat.','target_temprature_f; hvac_mode','String (63-88); String (heat, cool, heat-cool, off)',0,'/devices/{0}'),(3,'Set ETA','Sets the Estimated time of Arival.  Time in milliseconds after January 1, 1970, 0:00:00 GMT.','estimated_arrival_window_begin, estimated_arrival_window_end','String (YYYY-MM-DDTHh:Mm:Ss.mmmZ), String (YYYY-MM-DDTHh:Mm:Ss.mmmZ)',0,'/structures/{0}/eta');
 /*!40000 ALTER TABLE `actions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -249,4 +249,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-10-18 14:20:45
+-- Dump completed on 2015-11-01  2:16:59

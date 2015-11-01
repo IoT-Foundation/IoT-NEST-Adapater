@@ -1,5 +1,8 @@
 package com.retellmobile.iot.rest.util;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.concurrent.Callable;
@@ -12,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import com.retellmobile.iot.rest.model.UserDevice;
@@ -21,7 +25,7 @@ import com.retellmobile.iot.rest.services.DeviceService;
 public class NestClient implements Callable<JSONObject> {
 
     public enum UrlType {
-	ALL_DEVICES, MY_DEVICE, SET_TEMPERATURE;
+	ALL_DEVICES, MY_DEVICE, INFO_UPDATE;
     }
 
     public enum RequestType {
@@ -53,7 +57,17 @@ public class NestClient implements Callable<JSONObject> {
     public JSONObject call() throws Exception {
 	try {
 	    JSONObject result = new JSONObject();
-	    RestTemplate restTemplate = new RestTemplate();
+	    SimpleClientHttpRequestFactory simpleFac = new SimpleClientHttpRequestFactory() {
+		@Override
+		protected void prepareConnection(HttpURLConnection connection,
+			String httpMethod) throws IOException {
+		    super.prepareConnection(connection, httpMethod);
+		    connection.setInstanceFollowRedirects(true);
+		}
+	    };
+
+	    RestTemplate restTemplate = new RestTemplate(simpleFac);
+
 	    String nResp;
 	    // dummy call to get request type
 	    this.getURLForCall();
@@ -75,6 +89,15 @@ public class NestClient implements Callable<JSONObject> {
 			this.getURLForCall(), HttpMethod.PUT, entity,
 			String.class);
 		System.out.println("Response: " + data);
+		if (data.getStatusCode().value() >= 300
+			&& data.getStatusCode().value() < 400) {
+		    HttpHeaders respHeaders = data.getHeaders();
+		    URI redirectUrl = respHeaders.getLocation();
+		    data = restTemplate.exchange(redirectUrl, HttpMethod.PUT,
+			    entity, String.class);
+		    System.out.println("Response: " + data);
+		}
+
 		result = new JSONObject(
 			"{\"message\":\"successfully updated the temperature.\"}");
 		// restTemplate.put(this.getURLForCall(), this.body);
@@ -95,7 +118,7 @@ public class NestClient implements Callable<JSONObject> {
 	case MY_DEVICE:
 	    // Do nothing for now
 	    break;
-	case SET_TEMPERATURE:
+	case INFO_UPDATE:
 	    break;
 	default:
 	    break;
@@ -164,7 +187,7 @@ public class NestClient implements Callable<JSONObject> {
 	    url = NEST_BASE_URL + this.appendURL + "?auth=" + this.accessToken;
 	    reqType = RequestType.GET;
 	    break;
-	case SET_TEMPERATURE:
+	case INFO_UPDATE:
 	    url = NEST_BASE_URL + this.appendURL + "?auth=" + this.accessToken;
 	    reqType = RequestType.PUT;
 	    break;

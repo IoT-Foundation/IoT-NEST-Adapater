@@ -352,7 +352,7 @@ public class APIIoTController {
 				}
 				Future<JSONObject> result = eSrv
 					.submit(new NestClient(
-						UrlType.SET_TEMPERATURE, user
+						UrlType.INFO_UPDATE, user
 							.getNestAuthToken(),
 						token, partialURL,
 						this.deviceSrv, reqData));

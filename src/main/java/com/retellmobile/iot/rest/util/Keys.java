@@ -68,7 +68,7 @@ public interface Keys {
 	static final String UI_COLOR_STATE = "ui_color_state";
     }
 
-    static class STRUCTURE {
+    public static interface STRUCTURE {
 	static final String THERMOSTATS = "thermostats";
 	static final String SMOKE_CO_ALARMS = "smoke_co_alarms";
 	static final String AWAY = "away";

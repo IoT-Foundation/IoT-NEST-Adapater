@@ -353,7 +353,7 @@ public class APIIoTController {
 				Future<JSONObject> result = eSrv
 					.submit(new NestClient(
 						UrlType.INFO_UPDATE, user
-						.getNestAuthToken(),
+							.getNestAuthToken(),
 						token, partialURL,
 						this.deviceSrv, reqData));
 				value = result.get();
@@ -379,7 +379,7 @@ public class APIIoTController {
 
 	ModelAndView mav = new ModelAndView();
 	mav.setView(jsonView);
-	mav.addObject(RESULT_FIELD, value.toString());
+	mav.addObject(RESULT_FIELD, value == null ? "" : value.toString());
 	mav.addObject(STATUS_FIELD, status);
 	mav.addObject(MSG_FIELD, msg);
 	return mav;

@@ -85,9 +85,9 @@ public class NestClient implements Callable<JSONObject> {
 		HttpEntity<String> entity = new HttpEntity<String>(
 			this.body.toString(), headers);
 
-		ResponseEntity<String> data = restTemplate.exchange(
-			this.getURLForCall(), HttpMethod.PUT, entity,
-			String.class);
+		String targetURL = this.getURLForCall();
+		ResponseEntity<String> data = restTemplate.exchange(targetURL,
+			HttpMethod.PUT, entity, String.class);
 		System.out.println("Response: " + data);
 		if (data.getStatusCode().value() >= 300
 			&& data.getStatusCode().value() < 400) {

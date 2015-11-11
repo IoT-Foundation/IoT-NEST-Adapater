@@ -13,6 +13,7 @@ public class ThermostatsData extends DeviceData {
     public boolean fan_timer_active;
     public String hvac_state;
     public String hvac_mode;
+    public String away;
     public double target_temperature_f;
     public double target_temperature_high_f;
     public double target_temperature_low_f;
@@ -35,6 +36,9 @@ public class ThermostatsData extends DeviceData {
 		this.hvac_state = jObj.getString(Keys.THERMOSTAT.HVAC_STATE);
 	    }
 	    this.hvac_mode = jObj.getString(Keys.THERMOSTAT.HVAC_MODE);
+	    if (jObj.has(Keys.STRUCTURE.AWAY)) {
+		this.away = jObj.getString(Keys.STRUCTURE.AWAY);
+	    }
 	    this.target_temperature_f = jObj
 		    .getDouble(Keys.THERMOSTAT.TARGET_TEMP_F);
 	    this.target_temperature_high_f = jObj

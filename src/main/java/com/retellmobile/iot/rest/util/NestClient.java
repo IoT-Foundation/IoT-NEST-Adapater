@@ -170,7 +170,13 @@ public class NestClient implements Callable<JSONObject> {
 	userDevice.setToken(this.token);
 	userDevice.setZipCode(structInfo.getString(Keys.STRUCTURE.POSTAL_CODE));
 	JSONObject devices = data.getJSONObject(Keys.DEVICES);
-	JSONObject userDevices = devices.getJSONObject(deviceType.name());
+	JSONObject userDevices = new JSONObject();
+	if (devices.has(deviceType.name())) {
+	    userDevices = devices.getJSONObject(deviceType.name());
+	} else {
+	    userDevices = devices
+		    .getJSONObject(deviceType.name().toLowerCase());
+	}
 	JSONObject device = userDevices.getJSONObject(deviceId);
 	userDevice.setDeviceShortName(device.getString(Keys.NAME));
 	userDevice.setDeviceLongName(device.getString(Keys.NAME_LONG));

@@ -2,6 +2,7 @@ package com.retellmobile.iot.rest.resp.model;
 
 import org.json.JSONObject;
 
+import com.retellmobile.iot.rest.model.SupportedDevice;
 import com.retellmobile.iot.rest.util.Keys;
 
 public class SmokeAlarmData extends DeviceData {
@@ -10,9 +11,10 @@ public class SmokeAlarmData extends DeviceData {
     public String co_alarm_state;
     public String smoke_alarm_state;
 
-    public SmokeAlarmData(JSONObject jObj) {
+    public SmokeAlarmData(SupportedDevice sInfo, JSONObject jObj) {
 	super(jObj);
 	try {
+	    this.hrefImageUrl = sInfo.getHrefImageUrl();
 	    this.battery_health = jObj
 		    .getString(Keys.SMOKE_CO_ALARM.BATTERY_HEALTH);
 	    this.co_alarm_state = jObj

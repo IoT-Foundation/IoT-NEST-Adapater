@@ -17,6 +17,8 @@ public class SupportedDevice {
     private String deviceType;
     @Column(name = "misc")
     private String misc;
+    @Column(name = "hrefImageUrl")
+    private String hrefImageUrl;
 
     public String getDeviceType() {
 	return deviceType;
@@ -36,6 +38,14 @@ public class SupportedDevice {
 
     public Integer getDbId() {
 	return dbId;
+    }
+
+    public String getHrefImageUrl() {
+	return hrefImageUrl;
+    }
+
+    public void setHrefImageUrl(String hrefImageUrl) {
+	this.hrefImageUrl = hrefImageUrl;
     }
 
 }

@@ -15,6 +15,8 @@ public class DeviceData {
     public String last_connection;
     public boolean is_online;
     public int device_type;
+    public String primary_attribute;
+    public String hrefImageUrl;
 
     public DeviceData(JSONObject jObj) {
 	try {
@@ -28,6 +30,11 @@ public class DeviceData {
 		this.last_connection = jObj.getString(Keys.LAST_CONNECTION);
 	    }
 	    this.is_online = jObj.getBoolean(Keys.IS_ONLINE);
+	    if (jObj.has(Keys.STRUCTURE.NAME)) {
+		this.primary_attribute = jObj.getString(Keys.STRUCTURE.NAME);
+	    } else {
+		this.primary_attribute = "Default";
+	    }
 	} catch (Throwable th) {
 	    throw new IllegalStateException();
 	}
@@ -103,6 +110,22 @@ public class DeviceData {
 
     public void setDevice_type(int deviceType) {
 	this.device_type = deviceType;
+    }
+
+    public String getPrimary_attribute() {
+	return primary_attribute;
+    }
+
+    public void setPrimary_attribute(String primary_attribute) {
+	this.primary_attribute = primary_attribute;
+    }
+
+    public String getHrefImageUrl() {
+	return hrefImageUrl;
+    }
+
+    public void setHrefImageUrl(String hrefImageUrl) {
+	this.hrefImageUrl = hrefImageUrl;
     }
 
 }

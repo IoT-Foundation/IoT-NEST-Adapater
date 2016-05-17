@@ -223,13 +223,17 @@ public class APIIoTController {
 		    partialURL, this.deviceSrv, null));
 	    JSONObject value = result.get();
 	    if (device.getUserDeviceType().equals(DeviceType.THERMOSTATS)) {
-		ThermostatsData td = new ThermostatsData(value);
+		SupportedDevice sInfo = this.deviceSrv
+			.getDeviceById(DeviceType.THERMOSTATS.ordinal());
+		ThermostatsData td = new ThermostatsData(sInfo, value);
 		td.setDevice_type(DeviceType.THERMOSTATS.ordinal());
-		mav.addObject(RESULT_FIELD, new ThermostatsData(value));
+		mav.addObject(RESULT_FIELD, td);
 	    } else {
-		SmokeAlarmData sad = new SmokeAlarmData(value);
+		SupportedDevice sInfo = this.deviceSrv
+			.getDeviceById(DeviceType.SMOKE_CO_ALARMS.ordinal());
+		SmokeAlarmData sad = new SmokeAlarmData(sInfo, value);
 		sad.setDevice_type(DeviceType.SMOKE_CO_ALARMS.ordinal());
-		mav.addObject(RESULT_FIELD, new SmokeAlarmData(value));
+		mav.addObject(RESULT_FIELD, sad);
 	    }
 	    status = true;
 	} catch (Exception ex) {
@@ -353,7 +357,7 @@ public class APIIoTController {
 				Future<JSONObject> result = eSrv
 					.submit(new NestClient(
 						UrlType.INFO_UPDATE, user
-							.getNestAuthToken(),
+						.getNestAuthToken(),
 						token, partialURL,
 						this.deviceSrv, reqData));
 				value = result.get();

@@ -2,6 +2,7 @@ package com.retellmobile.iot.rest.resp.model;
 
 import org.json.JSONObject;
 
+import com.retellmobile.iot.rest.model.SupportedDevice;
 import com.retellmobile.iot.rest.util.Keys;
 
 public class ThermostatsData extends DeviceData {
@@ -20,9 +21,10 @@ public class ThermostatsData extends DeviceData {
     public double away_temperature_high_f;
     public double away_temperature_low_f;
 
-    public ThermostatsData(JSONObject jObj) {
+    public ThermostatsData(SupportedDevice sInfo, JSONObject jObj) {
 	super(jObj);
 	try {
+	    this.hrefImageUrl = sInfo.getHrefImageUrl();
 	    this.can_cool = jObj.getBoolean(Keys.THERMOSTAT.CAN_COOL);
 	    this.can_heat = jObj.getBoolean(Keys.THERMOSTAT.CAN_HEAT);
 	    this.is_using_emergency_heat = jObj
